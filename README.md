@@ -28,7 +28,7 @@
 26. Cube.io
 27. ToDo App
 28. 2048
-29. Rotating Cube
+29. Rotating Cube : https://50-javascript-projects-tawny.vercel.app/
 30. Prime Number checker
 31. Sudoku Solver
 32. Gameboy Tetris clone
