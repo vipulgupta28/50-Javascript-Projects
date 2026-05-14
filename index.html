@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>50 JS Projects Playground</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:          #0d1117;
+      --sidebar-bg:  #161b22;
+      --border:      #30363d;
+      --text:        #c9d1d9;
+      --muted:       #8b949e;
+      --accent:      #58a6ff;
+      --item-hover:  #1f2937;
+      --item-active: rgba(88,166,255,.15);
+      --tag-bg:      #21262d;
+
+      --cat-games:   #a78bfa;
+      --cat-tools:   #34d399;
+      --cat-apps:    #fb923c;
+      --cat-sim:     #22d3ee;
+      --cat-creative:#f472b6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    .sidebar {
+      width: 290px;
+      min-width: 290px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #58a6ff, #a78bfa);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .sidebar-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      padding-left: 40px;
+    }
+
+    .search-wrap {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 7px 11px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted); }
+
+    .filter-row {
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ftag {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      background: var(--tag-bg);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .ftag:hover { color: var(--text); border-color: var(--muted); }
+    .ftag[data-cat="All"].active      { background:#58a6ff22; border-color:var(--accent); color:var(--accent); }
+    .ftag[data-cat="Games"].active    { background:#a78bfa22; border-color:var(--cat-games); color:var(--cat-games); }
+    .ftag[data-cat="Tools"].active    { background:#34d39922; border-color:var(--cat-tools); color:var(--cat-tools); }
+    .ftag[data-cat="Apps"].active     { background:#fb923c22; border-color:var(--cat-apps); color:var(--cat-apps); }
+    .ftag[data-cat="Simulations"].active { background:#22d3ee22; border-color:var(--cat-sim); color:var(--cat-sim); }
+    .ftag[data-cat="Creative"].active { background:#f472b622; border-color:var(--cat-creative); color:var(--cat-creative); }
+
+    .list-meta {
+      padding: 5px 14px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .project-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px 8px;
+    }
+
+    .project-list::-webkit-scrollbar { width: 4px; }
+    .project-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .proj-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 9px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background 0.12s;
+      gap: 9px;
+      border: 1px solid transparent;
+    }
+
+    .proj-item:hover { background: var(--item-hover); }
+
+    .proj-item.active {
+      background: var(--item-active);
+      border-color: rgba(88,166,255,.25);
+    }
+
+    .proj-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .proj-item.active .proj-dot  { background: var(--accent); }
+
+    .proj-name { font-size: 13px; flex: 1; line-height: 1.3; color: var(--text); }
+    .proj-item.active .proj-name { color: #fff; }
+
+    .cat-pill {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    .cat-pill.Games      { background:#a78bfa20; color:var(--cat-games); }
+    .cat-pill.Tools      { background:#34d39920; color:var(--cat-tools); }
+    .cat-pill.Apps       { background:#fb923c20; color:var(--cat-apps); }
+    .cat-pill.Simulations{ background:#22d3ee20; color:var(--cat-sim); }
+    .cat-pill.Creative   { background:#f472b620; color:var(--cat-creative); }
+
+    .no-results { padding: 28px 12px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ── MAIN ───────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .preview-bar {
+      height: 50px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .preview-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-name.hint { color: var(--muted); font-weight: 400; }
+
+    .bar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 13px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--tag-bg);
+      color: var(--text);
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    .reload-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+
+    .reload-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .preview-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Welcome screen */
+    .welcome {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+      padding: 40px;
+      pointer-events: none;
+    }
+
+    .welcome-emoji { font-size: 56px; line-height: 1; }
+
+    .welcome-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-desc {
+      font-size: 14.5px;
+      color: var(--muted);
+      max-width: 380px;
+      line-height: 1.65;
+    }
+
+    .stats-row { display: flex; gap: 36px; margin: 4px 0; }
+
+    .stat { text-align: center; }
+
+    .stat-n {
+      font-size: 30px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #58a6ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .welcome-arrow {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .blink-arrow { animation: blink-move 1.6s ease-in-out infinite; display: inline-block; }
+    @keyframes blink-move {
+      0%, 100% { transform: translateX(0); opacity: 1; }
+      50%       { transform: translateX(-8px); opacity: 0.5; }
+    }
+
+    /* Divider lines for category groups */
+    .group-label {
+      padding: 10px 9px 3px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Iframe */
+    .preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+      display: none;
+    }
+
+    .preview-frame.visible { display: block; }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .loading-overlay.show { display: flex; }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">JS Projects</div>
+    </div>
+    <div class="sidebar-sub">50 vanilla JavaScript projects</div>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search projects..." autocomplete="off">
+  </div>
+
+  <div class="filter-row" id="filterRow"></div>
+
+  <div class="list-meta" id="listMeta">50 projects</div>
+
+  <div class="project-list" id="projectList"></div>
+</aside>
+
+<main class="main">
+  <div class="preview-bar">
+    <div class="preview-name hint" id="previewName">Select a project from the sidebar</div>
+    <div class="bar-actions" id="barActions" style="display:none">
+      <button class="reload-btn" id="reloadBtn" title="Reload">↺</button>
+      <a class="btn-link" id="openBtn" target="_blank">Open in new tab ↗</a>
+    </div>
+  </div>
+
+  <div class="preview-area">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-emoji">⚡</div>
+      <div class="welcome-title">50 JavaScript Projects</div>
+      <div class="welcome-desc">A collection of vanilla JS projects — games, tools, apps, simulations, and creative experiments.</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-n">50</div><div class="stat-l">Projects</div></div>
+        <div class="stat"><div class="stat-n">5</div><div class="stat-l">Categories</div></div>
+        <div class="stat"><div class="stat-n">0</div><div class="stat-l">Frameworks</div></div>
+      </div>
+      <div class="welcome-arrow"><span class="blink-arrow">←</span> Click a project to preview it</div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loadingText">Loading…</div>
+    </div>
+
+    <iframe class="preview-frame" id="previewFrame" title="Project Preview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+  </div>
+</main>
+
+<script>
+  const CATEGORY_ORDER = ['All', 'Games', 'Tools', 'Apps', 'Simulations', 'Creative'];
+
+  const CATEGORY_MAP = {
+    Games:       ['2048','Bird Hunting','Bouncing Balls','Breakout Game','Catching Game','Dino Game','Gameboy Tetris Clone','Hangman Game','Memory Card Game','Pong Game','Snake Game','Stake Mines','Tic Tac Toe'],
+    Tools:       ['Calculator','Currency Converter','Prime Number Checker','QR Code Generator','Roman Numeral Converter','Text Encryptor','Sudoku Solver','Voice-Controlled Stopwatch'],
+    Apps:        ['Api Quiz App','Chatbot','Crypto Price Tracker','Detect Device Battery','Infinite Quotes Generator','Language Translator','Movie Recommendation App','News App','Notes App','Online Dictionary','Pokemon Search App','Random Joke Generator','Recipe Finder App','ToDo App','Typing Test','Vending Machine','YouTube Video Search'],
+    Simulations: ['3D Dice Roller','Analog Clock','Gas Container Simulation','Interactive Constellation Drawer','Particle Simulation','Rocket Launch Animation','Rotating Cube','Cube.io'],
+    Creative:    ['Basic Drawing App','Interactive Periodic Table','Mood Palette Generator','Pixel Art Generator'],
+  };
+
+  const PROJECTS = [
+    { name:'2048',                        folder:'2048',                                                    file:'index.html'      },
+    { name:'3D Dice Roller',              folder:'3D Dice Roller',                                          file:'index.html'      },
+    { name:'Analog Clock',                folder:'Analog Clock',                                            file:'clock.html'      },
+    { name:'Api Quiz App',                folder:'Api Quiz App',                                            file:'index.html'      },
+    { name:'Basic Drawing App',           folder:'Basic Drawing App',                                       file:'index.html'      },
+    { name:'Bird Hunting',                folder:'Bird Hunting',                                            file:'index.html'      },
+    { name:'Bouncing Balls',              folder:'Bouncing Balls',                                          file:'index.html'      },
+    { name:'Breakout Game',               folder:'Breakout Game',                                           file:'index.html'      },
+    { name:'Calculator',                  folder:'Calculator',                                              file:'index.html'      },
+    { name:'Catching Game',               folder:'Catching game',                                           file:'index.html'      },
+    { name:'Chatbot',                     folder:'Chatbot',                                                 file:'bot.html'        },
+    { name:'Crypto Price Tracker',        folder:'Crypto Price Tracker',                                    file:'index.html'      },
+    { name:'Cube.io',                     folder:'cube.io',                                                 file:'index.html'      },
+    { name:'Currency Converter',          folder:'Currency Converter',                                      file:'index.html'      },
+    { name:'Detect Device Battery',       folder:'Detect Device Battery',                                   file:'index.html'      },
+    { name:'Dino Game',                   folder:'Dino Game',                                               file:'index.html'      },
+    { name:'Gameboy Tetris Clone',        folder:'Gameboy Tetris Clone',                                    file:'index.html'      },
+    { name:'Gas Container Simulation',    folder:'Gas inside container simulation with Temperature',        file:'index.html'      },
+    { name:'Hangman Game',                folder:'Hangman Game',                                            file:'index.html'      },
+    { name:'Infinite Quotes Generator',   folder:'Infinite Quotes generator',                               file:'index.html'      },
+    { name:'Interactive Constellation',   folder:'Interactive Constellation Drawer',                        file:'index.html'      },
+    { name:'Interactive Periodic Table',  folder:'Interactive Periodic Table',                              file:'index.html'      },
+    { name:'Language Translator',         folder:'Language Translator',                                     file:'index.html'      },
+    { name:'Memory Card Game',            folder:'Memory Card Game',                                        file:'index.html'      },
+    { name:'Mood Palette Generator',      folder:'Mood Palette Genertor',                                   file:'index.html'      },
+    { name:'Movie Recommendation App',    folder:'Movie Recommendation App',                                file:'index.html'      },
+    { name:'News App',                    folder:'News App',                                                file:'index.html'      },
+    { name:'Notes App',                   folder:'Notes App',                                               file:'index.html'      },
+    { name:'Online Dictionary',           folder:'Online Dictionary',                                       file:'index.html'      },
+    { name:'Particle Simulation',         folder:'Particle Simulation',                                     file:'index.html'      },
+    { name:'Pixel Art Generator',         folder:'Pixel Art Generator',                                     file:'index.html'      },
+    { name:'Pokemon Search App',          folder:'Pokemon Search App',                                      file:'index.html'      },
+    { name:'Pong Game',                   folder:'Pong Game',                                               file:'index.html'      },
+    { name:'Prime Number Checker',        folder:'Prime Number Checker',                                    file:'index.html'      },
+    { name:'QR Code Generator',           folder:'QR Code Generator',                                      file:'index.html'      },
+    { name:'Random Joke Generator',       folder:'Random Joke Generator',                                   file:'index.html'      },
+    { name:'Recipe Finder App',           folder:'Recipe Finder App',                                       file:'index.html'      },
+    { name:'Rocket Launch Animation',     folder:'Rocket Launch Animation',                                 file:'index.html'      },
+    { name:'Roman Numeral Converter',     folder:'Roman Numeral Convertor',                                 file:'index.html'      },
+    { name:'Rotating Cube',               folder:'Rotating Cube',                                           file:'index.html'      },
+    { name:'Snake Game',                  folder:'Snake Game',                                              file:'index.html'      },
+    { name:'Stake Mines',                 folder:'Stake-Mines',                                             file:'index.html'      },
+    { name:'Sudoku Solver',               folder:'Sudoku Solver',                                           file:'index.html'      },
+    { name:'Text Encryptor',              folder:'Text Encryptor',                                          file:'index.html'      },
+    { name:'Tic Tac Toe',                 folder:'Tic Tac Toe',                                            file:'index.html'      },
+    { name:'ToDo App',                    folder:'ToDo App',                                                file:'index.html'      },
+    { name:'Typing Test',                 folder:'Typing Test',                                             file:'Landingpage.html' },
+    { name:'Vending Machine',             folder:'Vending Machine',                                         file:'index.html'      },
+    { name:'Voice-Controlled Stopwatch',  folder:'Voice-Controlled Stopwatch',                              file:'index.html'      },
+    { name:'YouTube Video Search',        folder:'YouTube video search App',                                file:'index.html'      },
+  ];
+
+  // Build lookup: name → category
+  const nameToCategory = {};
+  for (const [cat, names] of Object.entries(CATEGORY_MAP)) {
+    names.forEach(n => { nameToCategory[n] = cat; });
+  }
+
+  // Enrich projects
+  PROJECTS.forEach(p => {
+    p.category = nameToCategory[p.name] || 'Apps';
+    p.path = '50-Javascript-Projects/' + p.folder.replace(/ /g, '%20') + '/' + p.file;
+  });
+
+  // ── State ──────────────────────────────────────
+  let activeFilter  = 'All';
+  let activeProject = null;
+
+  // ── Filter tags ────────────────────────────────
+  const filterRow = document.getElementById('filterRow');
+  CATEGORY_ORDER.forEach(cat => {
+    const el = document.createElement('span');
+    el.className = 'ftag' + (cat === 'All' ? ' active' : '');
+    el.dataset.cat = cat;
+    el.textContent = cat;
+    el.addEventListener('click', () => {
+      activeFilter = cat;
+      document.querySelectorAll('.ftag').forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
+      renderList();
+    });
+    filterRow.appendChild(el);
+  });
+
+  // ── Search ─────────────────────────────────────
+  document.getElementById('searchInput').addEventListener('input', renderList);
+
+  // ── Render list ────────────────────────────────
+  function renderList() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const visible = PROJECTS.filter(p => {
+      const matchCat    = activeFilter === 'All' || p.category === activeFilter;
+      const matchSearch = !q || p.name.toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+
+    const listEl = document.getElementById('projectList');
+    const metaEl = document.getElementById('listMeta');
+    metaEl.textContent = `${visible.length} project${visible.length !== 1 ? 's' : ''}`;
+    listEl.innerHTML = '';
+
+    if (!visible.length) {
+      listEl.innerHTML = '<div class="no-results">No projects match</div>';
+      return;
+    }
+
+    // Group by category when filter is All and no search
+    const grouped = (activeFilter === 'All' && !q);
+    if (grouped) {
+      const byCategory = {};
+      CATEGORY_ORDER.slice(1).forEach(cat => { byCategory[cat] = []; });
+      visible.forEach(p => (byCategory[p.category] || (byCategory['Apps'] = [])).push(p));
+
+      CATEGORY_ORDER.slice(1).forEach(cat => {
+        if (!byCategory[cat] || !byCategory[cat].length) return;
+        const label = document.createElement('div');
+        label.className = 'group-label';
+        label.textContent = cat;
+        listEl.appendChild(label);
+        byCategory[cat].forEach(p => listEl.appendChild(makeItem(p)));
+      });
+    } else {
+      visible.forEach(p => listEl.appendChild(makeItem(p)));
+    }
+  }
+
+  function makeItem(p) {
+    const el = document.createElement('div');
+    el.className = 'proj-item' + (activeProject === p.name ? ' active' : '');
+    el.innerHTML = `
+      <div class="proj-dot"></div>
+      <div class="proj-name">${p.name}</div>
+      <div class="cat-pill ${p.category}">${p.category}</div>
+    `;
+    el.addEventListener('click', () => loadProject(p));
+    return el;
+  }
+
+  // ── Load project ───────────────────────────────
+  function loadProject(p) {
+    activeProject = p.name;
+    renderList();
+
+    // Header
+    const nameEl = document.getElementById('previewName');
+    nameEl.textContent = p.name;
+    nameEl.classList.remove('hint');
+
+    // Actions
+    const actions = document.getElementById('barActions');
+    actions.style.display = 'flex';
+    document.getElementById('openBtn').href = p.path;
+
+    // Loading
+    const overlay  = document.getElementById('loadingOverlay');
+    const frame    = document.getElementById('previewFrame');
+    const welcome  = document.getElementById('welcomeScreen');
+
+    welcome.style.display = 'none';
+    overlay.classList.add('show');
+    document.getElementById('loadingText').textContent = `Loading ${p.name}…`;
+
+    frame.classList.remove('visible');
+    frame.src = '';
+
+    // Small delay so browser paints the overlay first
+    requestAnimationFrame(() => {
+      frame.onload = () => {
+        overlay.classList.remove('show');
+        frame.classList.add('visible');
+      };
+      frame.src = p.path;
+    });
+  }
+
+  // ── Reload button ──────────────────────────────
+  document.getElementById('reloadBtn').addEventListener('click', () => {
+    const frame = document.getElementById('previewFrame');
+    if (frame.src) {
+      const src = frame.src;
+      frame.src = '';
+      frame.src = src;
+    }
+  });
+
+  // ── Keyboard navigation ────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    const visible = getVisible();
+    if (!visible.length) return;
+    const idx = visible.findIndex(p => p.name === activeProject);
+    if (e.key === 'ArrowDown') { e.preventDefault(); loadProject(visible[Math.min(idx + 1, visible.length - 1)]); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); loadProject(visible[Math.max(idx - 1, 0)]); }
+  });
+
+  function getVisible() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    return PROJECTS.filter(p => {
+      const matchCat    = activeFilter === 'All' || p.category === activeFilter;
+      const matchSearch = !q || p.name.toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+  }
+
+  // ── Init ──────────────────────────────────────
+  renderList();
+</script>
+</body>
+</html>
